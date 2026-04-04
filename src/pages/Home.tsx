@@ -1,4 +1,4 @@
-const VIDEO_URL = '/10740762-uhd_3824_2160_30fps.mp4'
+import bgVideo from '../assets/artGirl_30fps_60s.mp4'
 
 function Home() {
   return (
@@ -6,7 +6,7 @@ function Home() {
       {/* Background video */}
       <video
         className="absolute inset-0 w-full h-full object-cover"
-        src={VIDEO_URL}
+        src={bgVideo}
         autoPlay
         muted
         loop

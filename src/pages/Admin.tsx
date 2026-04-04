@@ -95,7 +95,6 @@ function Admin() {
   const [homeDesc, setHomeDesc] = useState(
     "Hi I'm Paul, I'm a TouchDesigner artist that brings together multiple mediums like dance and light, translating them into immersive digital environments."
   )
-  const [homeBgVideo, setHomeBgVideo] = useState('/10740762-uhd_3824_2160_30fps.mp4')
 
   // Projects
   const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS)
@@ -170,10 +169,6 @@ function Admin() {
           <div>
             <Label>Description</Label>
             <Textarea value={homeDesc} onChange={setHomeDesc} placeholder="One-line bio" rows={3} />
-          </div>
-          <div>
-            <Label>Background Video (filename or URL)</Label>
-            <Input value={homeBgVideo} onChange={setHomeBgVideo} placeholder="/video.mp4" />
           </div>
           <div><SaveButton /></div>
         </div>
