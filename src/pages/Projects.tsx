@@ -41,28 +41,30 @@ function Projects() {
                 key={project.slug}
                 className='group'
               >
-                <div
-                  className='relative w-full aspect-video bg-charcoal overflow-hidden'
-                  style={{ boxShadow: '0px 0 6px 0px #e8e2d9' }}
-                >
-                  {project.youtube_id ? (
-                    <img
-                      src={`https://img.youtube.com/vi/${project.youtube_id}/maxresdefault.jpg`}
-                      onError={(e) => {
-                        e.currentTarget.src = `https://img.youtube.com/vi/${project.youtube_id}/hqdefault.jpg`;
-                      }}
-                      alt={project.title}
-                      className='w-full h-full object-cover scale-[1.2] group-hover:scale-[1.25] transition-transform duration-700'
-                    />
-                  ) : (
-                    <div className='absolute inset-0 bg-silver/5' />
-                  )}
+                <div className='relative'>
+                  <div className='absolute inset-0 scale-[1.015] bg-silver/8 blur-xl opacity-35 transition-opacity duration-500 group-hover:opacity-50' />
+                  <div className='relative w-full aspect-video overflow-hidden border border-silver/14 bg-charcoal'>
+                    {project.youtube_id ? (
+                      <img
+                        src={`https://img.youtube.com/vi/${project.youtube_id}/maxresdefault.jpg`}
+                        onError={(e) => {
+                          e.currentTarget.src = `https://img.youtube.com/vi/${project.youtube_id}/hqdefault.jpg`;
+                        }}
+                        alt={project.title}
+                        className='w-full h-full object-cover scale-[1.2] group-hover:scale-[1.25] transition-transform duration-700'
+                      />
+                    ) : (
+                      <div className='absolute inset-0 bg-silver/5' />
+                    )}
 
-                  {/* Hover overlay — dims thumbnail and shows VIEW */}
-                  <div className='absolute inset-0 bg-black/20 group-hover:bg-black/50 transition-colors duration-400 flex items-center justify-center'>
-                    <span className='text-xs tracking-widest uppercase text-beige opacity-0 group-hover:opacity-100 transition-opacity duration-400'>
-                      View
-                    </span>
+                    <div className='absolute inset-x-0 top-0 h-px bg-white/12' />
+
+                    {/* Hover overlay — dims thumbnail and shows VIEW */}
+                    <div className='absolute inset-0 bg-black/20 group-hover:bg-black/50 transition-colors duration-400 flex items-center justify-center'>
+                      <span className='text-xs tracking-widest uppercase text-beige opacity-0 group-hover:opacity-100 transition-opacity duration-400'>
+                        View
+                      </span>
+                    </div>
                   </div>
                 </div>
 
