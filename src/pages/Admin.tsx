@@ -1,15 +1,5 @@
-import { useState } from 'react'
-import { PROJECTS as INITIAL_PROJECTS } from './Projects'
-
-type Project = {
-  id: string
-  slug: string
-  title: string
-  description: string
-  youtubeId: string
-}
-
-const INITIAL_TAGS = ['Movement', 'Interaction', 'Perception', 'Light', 'Space']
+import { useState, useEffect } from 'react'
+import { api, type Project } from '../api'
 
 // ── Reusable field components ────────────────────────────────────────────────
 
@@ -61,45 +51,94 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
   )
 }
 
-function SaveButton({ label = 'Save' }: { label?: string }) {
-  return (
-    <button
-      type="button"
-      className="text-xs tracking-widest uppercase px-5 py-2 bg-beige text-black hover:bg-silver transition-colors duration-300"
-    >
-      {label}
-    </button>
-  )
-}
-
-function GhostButton({ onClick, children }: {
+function SaveButton({ onClick, saving, label = 'Save' }: {
   onClick: () => void
-  children: React.ReactNode
+  saving: boolean
+  label?: string
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="text-xs tracking-widest uppercase px-4 py-2 border border-silver/15 text-silver/50 hover:text-beige hover:border-silver/40 transition-colors duration-300"
+      disabled={saving}
+      className="text-xs tracking-widest uppercase px-5 py-2 bg-beige text-black hover:bg-silver transition-colors duration-300 disabled:opacity-40"
+    >
+      {saving ? 'Saving...' : label}
+    </button>
+  )
+}
+
+function GhostButton({ onClick, children, disabled }: {
+  onClick: () => void
+  children: React.ReactNode
+  disabled?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="text-xs tracking-widest uppercase px-4 py-2 border border-silver/15 text-silver/50 hover:text-beige hover:border-silver/40 transition-colors duration-300 disabled:opacity-20"
     >
       {children}
     </button>
   )
 }
 
+function Spinner() {
+  return (
+    <div className="flex items-center gap-2 text-silver/40 text-xs tracking-widest uppercase">
+      <div className="w-3 h-3 border border-silver/30 border-t-silver/70 rounded-full animate-spin" />
+      Loading...
+    </div>
+  )
+}
+
 // ── Admin page ───────────────────────────────────────────────────────────────
 
 function Admin() {
+  const [loading, setLoading] = useState(true)
+
   // Home
-  const [homeTitle, setHomeTitle] = useState('Paul Friedman')
-  const [homeDesc, setHomeDesc] = useState(
-    "Hi I'm Paul, I'm a TouchDesigner artist that brings together multiple mediums like dance and light, translating them into immersive digital environments."
-  )
+  const [homeTitle, setHomeTitle] = useState('')
+  const [homeDesc, setHomeDesc] = useState('')
+  const [savingHome, setSavingHome] = useState(false)
 
   // Projects
-  const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS)
-  const [newProject, setNewProject] = useState({ title: '', description: '', youtubeId: '' })
+  const [projects, setProjects] = useState<Project[]>([])
+  const [newProject, setNewProject] = useState({ title: '', description: '', youtube_id: '' })
+  const [savingProjects, setSavingProjects] = useState(false)
 
+  // About
+  const [aboutTitle, setAboutTitle] = useState('')
+  const [aboutDesc, setAboutDesc] = useState('')
+  const [tags, setTags] = useState<string[]>([])
+  const [tagInput, setTagInput] = useState('')
+  const [savingAbout, setSavingAbout] = useState(false)
+
+  // Contact
+  const [contactTitle, setContactTitle] = useState('')
+  const [contactEmail, setContactEmail] = useState('')
+  const [contactFooter, setContactFooter] = useState('')
+  const [savingContact, setSavingContact] = useState(false)
+
+  // Load all data on mount
+  useEffect(() => {
+    Promise.all([api.content.get(), api.projects.list()]).then(([content, projs]) => {
+      setHomeTitle(content.home_title)
+      setHomeDesc(content.home_description)
+      setAboutTitle(content.about_title)
+      setAboutDesc(content.about_description)
+      setTags(content.about_tags.split(',').map((t) => t.trim()))
+      setContactTitle(content.contact_title)
+      setContactEmail(content.contact_email)
+      setContactFooter(content.contact_footer)
+      setProjects(projs)
+      setLoading(false)
+    })
+  }, [])
+
+  // ── Project helpers ──
   const moveUp = (i: number) => {
     if (i === 0) return
     const updated = [...projects]
@@ -114,30 +153,43 @@ function Admin() {
     setProjects(updated)
   }
 
-  const deleteProject = (slug: string) => {
+  const deleteProject = async (slug: string) => {
+    await api.projects.delete(slug)
     setProjects(projects.filter((p) => p.slug !== slug))
   }
 
-  const addProject = () => {
+  const addProject = async () => {
     if (!newProject.title.trim()) return
-    const id = String(projects.length + 1).padStart(2, '0')
+    setSavingProjects(true)
+    const sort_order = projects.length + 1
     const slug = newProject.title.trim().toLowerCase().replace(/\s+/g, '-')
-    setProjects([...projects, { id, slug, ...newProject }])
-    setNewProject({ title: '', description: '', youtubeId: '' })
+    await api.projects.create({ slug, sort_order, ...newProject })
+    const updated = await api.projects.list()
+    setProjects(updated)
+    setNewProject({ title: '', description: '', youtube_id: '' })
+    setSavingProjects(false)
   }
 
-  const updateProject = (slug: string, field: keyof Omit<Project, 'id' | 'slug'>, value: string) => {
+  const updateProjectField = (slug: string, field: keyof Omit<Project, 'id' | 'slug'>, value: string | number) => {
     setProjects(projects.map((p) => (p.slug === slug ? { ...p, [field]: value } : p)))
   }
 
-  // About
-  const [aboutTitle, setAboutTitle] = useState('Circus artist turned\ndigital environment builder.')
-  const [aboutDesc, setAboutDesc] = useState(
-    "Hi I'm Paul. I started my career as a circus artist and gradually transitioned into interactive and immersive art. I'm interested in taking people out of their normal perception of the world and placing them into augmented environments through tools like interactive particle systems, distorted point clouds, and projection mapping. My work blends physical movement with digital systems to create responsive, experiential pieces."
-  )
-  const [tags, setTags] = useState<string[]>(INITIAL_TAGS)
-  const [tagInput, setTagInput] = useState('')
+  const saveProjects = async () => {
+    setSavingProjects(true)
+    await Promise.all(
+      projects.map((p, i) =>
+        api.projects.update(p.slug, {
+          title: p.title,
+          description: p.description,
+          youtube_id: p.youtube_id,
+          sort_order: i + 1,
+        })
+      )
+    )
+    setSavingProjects(false)
+  }
 
+  // ── Tag helpers ──
   const addTag = () => {
     const trimmed = tagInput.trim()
     if (!trimmed || tags.length >= 5) return
@@ -145,18 +197,44 @@ function Admin() {
     setTagInput('')
   }
 
-  const removeTag = (tag: string) => setTags(tags.filter((t) => t !== tag))
+  // ── Save helpers ──
+  const saveHome = async () => {
+    setSavingHome(true)
+    await api.content.update({ home_title: homeTitle, home_description: homeDesc })
+    setSavingHome(false)
+  }
 
-  // Contact
-  const [contactTitle, setContactTitle] = useState('Available for collaborations, performances & installations.')
-  const [contactDesc, setContactDesc] = useState('friedman146@gmail.com')
-  const [contactFooter, setContactFooter] = useState("Let's build something together")
+  const saveAbout = async () => {
+    setSavingAbout(true)
+    await api.content.update({
+      about_title: aboutTitle,
+      about_description: aboutDesc,
+      about_tags: tags.join(','),
+    })
+    setSavingAbout(false)
+  }
+
+  const saveContact = async () => {
+    setSavingContact(true)
+    await api.content.update({
+      contact_title: contactTitle,
+      contact_email: contactEmail,
+      contact_footer: contactFooter,
+    })
+    setSavingContact(false)
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen px-12 pt-32 flex">
+        <Spinner />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen px-12 pt-32 pb-24 max-w-3xl">
-      <span className="text-xs tracking-widest uppercase text-silver/30 mb-12 block">
-        Admin
-      </span>
+      <span className="text-xs tracking-widest uppercase text-silver/30 mb-12 block">Admin</span>
 
       {/* ── Home ── */}
       <section className="mb-16">
@@ -164,13 +242,15 @@ function Admin() {
         <div className="flex flex-col gap-5">
           <div>
             <Label>Title</Label>
-            <Input value={homeTitle} onChange={setHomeTitle} placeholder="Page title" />
+            <Input value={homeTitle} onChange={setHomeTitle} />
           </div>
           <div>
             <Label>Description</Label>
-            <Textarea value={homeDesc} onChange={setHomeDesc} placeholder="One-line bio" rows={3} />
+            <Textarea value={homeDesc} onChange={setHomeDesc} rows={3} />
           </div>
-          <div><SaveButton /></div>
+          <div>
+            <SaveButton onClick={saveHome} saving={savingHome} />
+          </div>
         </div>
       </section>
 
@@ -178,16 +258,16 @@ function Admin() {
       <section className="mb-16">
         <SectionHeader>Projects</SectionHeader>
 
-        {/* Existing projects */}
         <div className="flex flex-col gap-6 mb-10">
           {projects.map((project, i) => (
             <div key={project.slug} className="border border-silver/10 p-5 flex flex-col gap-4">
-              {/* Project header — index + order controls + delete */}
               <div className="flex items-center justify-between">
-                <span className="text-xs tracking-widest uppercase text-silver/30">{project.id}</span>
+                <span className="text-xs tracking-widest uppercase text-silver/30">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
                 <div className="flex items-center gap-2">
-                  <GhostButton onClick={() => moveUp(i)}>↑</GhostButton>
-                  <GhostButton onClick={() => moveDown(i)}>↓</GhostButton>
+                  <GhostButton onClick={() => moveUp(i)} disabled={i === 0}>↑</GhostButton>
+                  <GhostButton onClick={() => moveDown(i)} disabled={i === projects.length - 1}>↓</GhostButton>
                   <button
                     type="button"
                     onClick={() => deleteProject(project.slug)}
@@ -197,31 +277,17 @@ function Admin() {
                   </button>
                 </div>
               </div>
-
               <div>
                 <Label>Title</Label>
-                <Input
-                  value={project.title}
-                  onChange={(v) => updateProject(project.slug, 'title', v)}
-                  placeholder="Project title"
-                />
+                <Input value={project.title} onChange={(v) => updateProjectField(project.slug, 'title', v)} />
               </div>
               <div>
                 <Label>Description</Label>
-                <Textarea
-                  value={project.description}
-                  onChange={(v) => updateProject(project.slug, 'description', v)}
-                  placeholder="Project description"
-                  rows={3}
-                />
+                <Textarea value={project.description} onChange={(v) => updateProjectField(project.slug, 'description', v)} rows={3} />
               </div>
               <div>
                 <Label>YouTube ID</Label>
-                <Input
-                  value={project.youtubeId}
-                  onChange={(v) => updateProject(project.slug, 'youtubeId', v)}
-                  placeholder="dQw4w9WgXcQ"
-                />
+                <Input value={project.youtube_id} onChange={(v) => updateProjectField(project.slug, 'youtube_id', v)} placeholder="dQw4w9WgXcQ" />
               </div>
             </div>
           ))}
@@ -232,35 +298,26 @@ function Admin() {
           <span className="text-xs tracking-widest uppercase text-silver/30">Add Project</span>
           <div>
             <Label>Title</Label>
-            <Input
-              value={newProject.title}
-              onChange={(v) => setNewProject({ ...newProject, title: v })}
-              placeholder="Project title"
-            />
+            <Input value={newProject.title} onChange={(v) => setNewProject({ ...newProject, title: v })} placeholder="Project title" />
           </div>
           <div>
             <Label>Description</Label>
-            <Textarea
-              value={newProject.description}
-              onChange={(v) => setNewProject({ ...newProject, description: v })}
-              placeholder="Project description"
-              rows={3}
-            />
+            <Textarea value={newProject.description} onChange={(v) => setNewProject({ ...newProject, description: v })} placeholder="Project description" rows={3} />
           </div>
           <div>
             <Label>YouTube ID</Label>
-            <Input
-              value={newProject.youtubeId}
-              onChange={(v) => setNewProject({ ...newProject, youtubeId: v })}
-              placeholder="dQw4w9WgXcQ"
-            />
+            <Input value={newProject.youtube_id} onChange={(v) => setNewProject({ ...newProject, youtube_id: v })} placeholder="dQw4w9WgXcQ" />
           </div>
           <div>
-            <GhostButton onClick={addProject}>+ Add Project</GhostButton>
+            <GhostButton onClick={addProject} disabled={savingProjects}>
+              {savingProjects ? 'Adding...' : '+ Add Project'}
+            </GhostButton>
           </div>
         </div>
 
-        <div className="mt-6"><SaveButton label="Save Projects" /></div>
+        <div className="mt-6">
+          <SaveButton onClick={saveProjects} saving={savingProjects} label="Save Projects" />
+        </div>
       </section>
 
       {/* ── About ── */}
@@ -269,11 +326,11 @@ function Admin() {
         <div className="flex flex-col gap-5">
           <div>
             <Label>Title</Label>
-            <Textarea value={aboutTitle} onChange={setAboutTitle} placeholder="Page title" rows={2} />
+            <Textarea value={aboutTitle} onChange={setAboutTitle} rows={2} />
           </div>
           <div>
             <Label>Description</Label>
-            <Textarea value={aboutDesc} onChange={setAboutDesc} placeholder="Full bio" rows={5} />
+            <Textarea value={aboutDesc} onChange={setAboutDesc} rows={5} />
           </div>
           <div>
             <Label>Themes / Tags (max 5)</Label>
@@ -283,7 +340,7 @@ function Admin() {
                   <span className="text-xs tracking-widest uppercase text-silver/60">{tag}</span>
                   <button
                     type="button"
-                    onClick={() => removeTag(tag)}
+                    onClick={() => setTags(tags.filter((t) => t !== tag))}
                     className="text-silver/30 hover:text-red-400 transition-colors text-xs"
                   >
                     ✕
@@ -304,7 +361,7 @@ function Admin() {
               </div>
             )}
           </div>
-          <div><SaveButton /></div>
+          <div><SaveButton onClick={saveAbout} saving={savingAbout} /></div>
         </div>
       </section>
 
@@ -314,17 +371,17 @@ function Admin() {
         <div className="flex flex-col gap-5">
           <div>
             <Label>Title</Label>
-            <Textarea value={contactTitle} onChange={setContactTitle} placeholder="Page title" rows={2} />
+            <Textarea value={contactTitle} onChange={setContactTitle} rows={2} />
           </div>
           <div>
-            <Label>Email / Description</Label>
-            <Input value={contactDesc} onChange={setContactDesc} placeholder="email@example.com" />
+            <Label>Email</Label>
+            <Input value={contactEmail} onChange={setContactEmail} placeholder="email@example.com" />
           </div>
           <div>
             <Label>Footer Line</Label>
-            <Input value={contactFooter} onChange={setContactFooter} placeholder="Footer tagline" />
+            <Input value={contactFooter} onChange={setContactFooter} />
           </div>
-          <div><SaveButton /></div>
+          <div><SaveButton onClick={saveContact} saving={savingContact} /></div>
         </div>
       </section>
     </div>
