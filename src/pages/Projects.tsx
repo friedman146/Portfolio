@@ -31,7 +31,19 @@ function Projects() {
           : projects.map((project) => (
               <Link to={`/projects/${project.slug}`} key={project.slug} className="group">
                 <div className="relative w-full aspect-video bg-charcoal overflow-hidden">
-                  <div className="absolute inset-0 bg-silver/5 group-hover:bg-silver/10 transition-colors duration-500" />
+                  {project.youtube_id ? (
+                    <img
+                      src={`https://img.youtube.com/vi/${project.youtube_id}/maxresdefault.jpg`}
+                      onError={(e) => {
+                        e.currentTarget.src = `https://img.youtube.com/vi/${project.youtube_id}/hqdefault.jpg`
+                      }}
+                      alt={project.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-silver/5" />
+                  )}
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-500" />
                 </div>
                 <div className="flex justify-between items-baseline mt-3 px-1">
                   <span className="text-xs tracking-widest uppercase text-silver/30">
