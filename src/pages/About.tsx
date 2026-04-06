@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { api } from '../api'
+import SocialIcons from '../components/SocialIcons'
 
 function About() {
   const [title, setTitle] = useState('Circus artist turned\ndigital environment builder.')
@@ -7,12 +8,16 @@ function About() {
     "Hi I'm Paul. I started my career as a circus artist and gradually transitioned into interactive and immersive art. I'm interested in taking people out of their normal perception of the world and placing them into augmented environments through tools like interactive particle systems, distorted point clouds, and projection mapping. My work blends physical movement with digital systems to create responsive, experiential pieces."
   )
   const [tags, setTags] = useState(['Movement', 'Interaction', 'Perception', 'Light', 'Space'])
+  const [youtube, setYoutube] = useState('')
+  const [instagram, setInstagram] = useState('')
 
   useEffect(() => {
     api.content.get().then((c) => {
       setTitle(c.about_title)
       setDescription(c.about_description)
       setTags(c.about_tags.split(',').map((t) => t.trim()))
+      setYoutube(c.social_youtube ?? '')
+      setInstagram(c.social_instagram ?? '')
     })
   }, [])
 
@@ -29,12 +34,15 @@ function About() {
         </p>
       </div>
 
-      <div className="flex gap-6 flex-wrap">
-        {tags.map((tag) => (
-          <span key={tag} className="text-xs tracking-widest uppercase text-silver/30">
-            {tag}
-          </span>
-        ))}
+      <div className="flex items-center justify-between flex-wrap gap-6">
+        <div className="flex gap-6 flex-wrap">
+          {tags.map((tag) => (
+            <span key={tag} className="text-xs tracking-widest uppercase text-silver/30">
+              {tag}
+            </span>
+          ))}
+        </div>
+        <SocialIcons youtube={youtube} instagram={instagram} />
       </div>
     </section>
   )

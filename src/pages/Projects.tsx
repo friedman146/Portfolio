@@ -43,7 +43,7 @@ function Projects() {
                         e.currentTarget.src = `https://img.youtube.com/vi/${project.youtube_id}/hqdefault.jpg`
                       }}
                       alt={project.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      className="w-full h-full object-cover scale-[1.2] group-hover:scale-[1.25] transition-transform duration-700"
                     />
                   ) : (
                     <div className="absolute inset-0 bg-silver/5" />

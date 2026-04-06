@@ -16,6 +16,8 @@ export type Content = {
   contact_title: string
   contact_email: string
   contact_footer: string
+  social_youtube: string
+  social_instagram: string
 }
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' }

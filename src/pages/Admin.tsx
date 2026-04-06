@@ -114,6 +114,8 @@ function Admin() {
   const [aboutDesc, setAboutDesc] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState('')
+  const [socialYoutube, setSocialYoutube] = useState('')
+  const [socialInstagram, setSocialInstagram] = useState('')
   const [savingAbout, setSavingAbout] = useState(false)
 
   // Contact
@@ -130,6 +132,8 @@ function Admin() {
       setAboutTitle(content.about_title)
       setAboutDesc(content.about_description)
       setTags(content.about_tags.split(',').map((t) => t.trim()))
+      setSocialYoutube(content.social_youtube ?? '')
+      setSocialInstagram(content.social_instagram ?? '')
       setContactTitle(content.contact_title)
       setContactEmail(content.contact_email)
       setContactFooter(content.contact_footer)
@@ -210,6 +214,8 @@ function Admin() {
       about_title: aboutTitle,
       about_description: aboutDesc,
       about_tags: tags.join(','),
+      social_youtube: socialYoutube,
+      social_instagram: socialInstagram,
     })
     setSavingAbout(false)
   }
@@ -372,6 +378,14 @@ function Admin() {
                 <GhostButton onClick={addTag}>+ Add</GhostButton>
               </div>
             )}
+          </div>
+          <div>
+            <Label>YouTube URL</Label>
+            <Input value={socialYoutube} onChange={setSocialYoutube} placeholder="https://www.youtube.com/@..." />
+          </div>
+          <div>
+            <Label>Instagram URL</Label>
+            <Input value={socialInstagram} onChange={setSocialInstagram} placeholder="https://www.instagram.com/..." />
           </div>
           <div><SaveButton onClick={saveAbout} saving={savingAbout} /></div>
         </div>
