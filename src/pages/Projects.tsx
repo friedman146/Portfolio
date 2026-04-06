@@ -2,12 +2,17 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api, type Project } from '../api'
 
+// Module-level cache — survives remounts, prevents skeleton flash on back-navigation
+let cache: Project[] | null = null
+
 function Projects() {
-  const [projects, setProjects] = useState<Project[]>([])
-  const [loading, setLoading] = useState(true)
+  const [projects, setProjects] = useState<Project[]>(cache ?? [])
+  const [loading, setLoading] = useState(cache === null)
 
   useEffect(() => {
+    if (cache !== null) return
     api.projects.list().then((data) => {
+      cache = data
       setProjects(data)
       setLoading(false)
     })
@@ -30,7 +35,7 @@ function Projects() {
             ))
           : projects.map((project) => (
               <Link to={`/projects/${project.slug}`} key={project.slug} className="group">
-                <div className="relative w-full aspect-video bg-charcoal overflow-hidden">
+                <div className="relative w-full aspect-video bg-charcoal overflow-hidden" style={{ boxShadow: '0px 0 6px 0px #e8e2d9' }}>
                   {project.youtube_id ? (
                     <img
                       src={`https://img.youtube.com/vi/${project.youtube_id}/maxresdefault.jpg`}
@@ -43,8 +48,15 @@ function Projects() {
                   ) : (
                     <div className="absolute inset-0 bg-silver/5" />
                   )}
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-500" />
+
+                  {/* Hover overlay — dims thumbnail and shows VIEW */}
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/50 transition-colors duration-400 flex items-center justify-center">
+                    <span className="text-xs tracking-widest uppercase text-beige opacity-0 group-hover:opacity-100 transition-opacity duration-400">
+                      View
+                    </span>
+                  </div>
                 </div>
+
                 <div className="flex justify-between items-baseline mt-3 px-1">
                   <span className="text-xs tracking-widest uppercase text-silver/30">
                     {String(project.sort_order).padStart(2, '0')}
