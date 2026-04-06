@@ -261,10 +261,22 @@ function Admin() {
         <div className="flex flex-col gap-6 mb-10">
           {projects.map((project, i) => (
             <div key={project.slug} className="border border-silver/10 p-5 flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs tracking-widest uppercase text-silver/30">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
+              {/* Thumbnail + controls row */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  {project.youtube_id ? (
+                    <img
+                      src={`https://img.youtube.com/vi/${project.youtube_id}/hqdefault.jpg`}
+                      alt={project.title}
+                      className="w-20 aspect-video object-cover shrink-0"
+                    />
+                  ) : (
+                    <div className="w-20 aspect-video bg-charcoal shrink-0" />
+                  )}
+                  <span className="text-xs tracking-widest uppercase text-silver/30">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                </div>
                 <div className="flex items-center gap-2">
                   <GhostButton onClick={() => moveUp(i)} disabled={i === 0}>↑</GhostButton>
                   <GhostButton onClick={() => moveDown(i)} disabled={i === projects.length - 1}>↓</GhostButton>
