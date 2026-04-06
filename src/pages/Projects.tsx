@@ -24,7 +24,7 @@ function Projects() {
         Projects
       </span>
 
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mt-10'>
+      <div className='grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-6 mt-10'>
         {loading
           ? Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className='group'>
