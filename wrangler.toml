@@ -6,3 +6,7 @@ pages_build_output_dir = "dist"
 binding = "DB"
 database_name = "main"
 database_id = "b780d2ce-a4be-4c65-a9fe-0fe5ef7d03cd"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "paul-portfolio-bucket"

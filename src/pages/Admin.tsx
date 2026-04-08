@@ -116,6 +116,8 @@ function Admin() {
   const [tagInput, setTagInput] = useState('')
   const [socialYoutube, setSocialYoutube] = useState('')
   const [socialInstagram, setSocialInstagram] = useState('')
+  const [aboutImage, setAboutImage] = useState('')
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [savingAbout, setSavingAbout] = useState(false)
 
   // Contact
@@ -134,6 +136,7 @@ function Admin() {
       setTags(content.about_tags.split(',').map((t) => t.trim()))
       setSocialYoutube(content.social_youtube ?? '')
       setSocialInstagram(content.social_instagram ?? '')
+      setAboutImage(content.about_image ?? '')
       setContactTitle(content.contact_title)
       setContactEmail(content.contact_email)
       setContactFooter(content.contact_footer)
@@ -413,6 +416,33 @@ function Admin() {
                 <GhostButton onClick={addTag}>+ Add</GhostButton>
               </div>
             )}
+          </div>
+          <div>
+            <Label>Profile Photo</Label>
+            <div className="flex items-center gap-4">
+              {aboutImage && (
+                <img src={aboutImage} alt="Profile" className="w-16 aspect-3/4 object-cover shrink-0" />
+              )}
+              <label className={`text-xs tracking-widest uppercase px-4 py-2 border border-silver/15 text-silver/50 hover:text-beige hover:border-silver/40 transition-colors duration-300 cursor-pointer ${uploadingImage ? 'opacity-40 pointer-events-none' : ''}`}>
+                {uploadingImage ? 'Uploading...' : aboutImage ? 'Replace Photo' : 'Upload Photo'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    setUploadingImage(true)
+                    const form = new FormData()
+                    form.append('image', file)
+                    const res = await fetch('/api/upload-image', { method: 'POST', body: form })
+                    const { url } = await res.json() as { url: string }
+                    setAboutImage(url)
+                    setUploadingImage(false)
+                  }}
+                />
+              </label>
+            </div>
           </div>
           <div>
             <Label>YouTube URL</Label>

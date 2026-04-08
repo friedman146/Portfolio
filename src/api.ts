@@ -19,6 +19,7 @@ export type Content = {
   contact_footer: string
   social_youtube: string
   social_instagram: string
+  about_image: string
 }
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' }
