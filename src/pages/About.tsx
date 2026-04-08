@@ -43,7 +43,7 @@ function About() {
             <img
               src={image}
               alt='Paul Friedman'
-              className='w-full aspect-3/4 object-cover'
+              className='w-full aspect-3/4 object-cover border border-silver/15'
             />
           </div>
         )}
