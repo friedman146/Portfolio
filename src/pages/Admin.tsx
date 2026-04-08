@@ -106,7 +106,7 @@ function Admin() {
 
   // Projects
   const [projects, setProjects] = useState<Project[]>([])
-  const [newProject, setNewProject] = useState({ title: '', description: '', youtube_id: '' })
+  const [newProject, setNewProject] = useState({ title: '', description: '', youtube_id: '', tags: '' })
   const [savingProjects, setSavingProjects] = useState(false)
 
   // About
@@ -170,7 +170,7 @@ function Admin() {
     await api.projects.create({ slug, sort_order, ...newProject })
     const updated = await api.projects.list()
     setProjects(updated)
-    setNewProject({ title: '', description: '', youtube_id: '' })
+    setNewProject({ title: '', description: '', youtube_id: '', tags: '' })
     setSavingProjects(false)
   }
 
@@ -186,6 +186,7 @@ function Admin() {
           title: p.title,
           description: p.description,
           youtube_id: p.youtube_id,
+          tags: p.tags,
           sort_order: i + 1,
         })
       )
@@ -306,6 +307,40 @@ function Admin() {
               <div>
                 <Label>YouTube ID</Label>
                 <Input value={project.youtube_id} onChange={(v) => updateProjectField(project.slug, 'youtube_id', v)} placeholder="dQw4w9WgXcQ" />
+              </div>
+              <div>
+                <Label>Tags (max 5)</Label>
+                <div className='flex flex-wrap gap-2 mb-3'>
+                  {(project.tags || '').split(',').filter(Boolean).map((tag) => (
+                    <div key={tag} className='flex items-center gap-2 border border-silver/15 px-3 py-1'>
+                      <span className='text-xs tracking-widest uppercase text-silver/60'>{tag.trim()}</span>
+                      <button
+                        type='button'
+                        onClick={() => {
+                          const updated = project.tags.split(',').filter((t) => t.trim() !== tag.trim()).join(',')
+                          updateProjectField(project.slug, 'tags', updated)
+                        }}
+                        className='text-silver/30 hover:text-red-400 transition-colors text-xs'
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                {(project.tags || '').split(',').filter(Boolean).length < 5 && (
+                  <input
+                    placeholder='New tag — press Enter'
+                    onKeyDown={(e) => {
+                      if (e.key !== 'Enter') return
+                      const val = e.currentTarget.value.trim()
+                      if (!val) return
+                      const current = (project.tags || '').split(',').filter(Boolean)
+                      updateProjectField(project.slug, 'tags', [...current, val].join(','))
+                      e.currentTarget.value = ''
+                    }}
+                    className='w-full bg-charcoal border border-silver/10 text-beige text-sm px-4 py-2 focus:outline-none focus:border-silver/30 placeholder:text-silver/20 transition-colors'
+                  />
+                )}
               </div>
             </div>
           ))}

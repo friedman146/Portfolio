@@ -5,6 +5,7 @@ export type Project = {
   description: string
   youtube_id: string
   sort_order: number
+  tags: string
 }
 
 export type Content = {

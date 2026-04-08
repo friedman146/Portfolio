@@ -18,11 +18,12 @@ export const onRequest: PagesFunction<Env> = async ({ request, env, params }) =>
       title: string
       description: string
       youtube_id: string
+      tags: string
       sort_order: number
     }
     await env.DB.prepare(
-      'UPDATE projects SET title = ?, description = ?, youtube_id = ?, sort_order = ? WHERE slug = ?'
-    ).bind(body.title, body.description, body.youtube_id, body.sort_order, slug).run()
+      'UPDATE projects SET title = ?, description = ?, youtube_id = ?, tags = ?, sort_order = ? WHERE slug = ?'
+    ).bind(body.title, body.description, body.youtube_id, body.tags, body.sort_order, slug).run()
     return Response.json({ success: true })
   }
 

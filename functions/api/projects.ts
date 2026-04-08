@@ -16,11 +16,12 @@ export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
       title: string
       description: string
       youtube_id: string
+      tags: string
       sort_order: number
     }
     await env.DB.prepare(
-      'INSERT INTO projects (slug, title, description, youtube_id, sort_order) VALUES (?, ?, ?, ?, ?)'
-    ).bind(body.slug, body.title, body.description, body.youtube_id, body.sort_order).run()
+      'INSERT INTO projects (slug, title, description, youtube_id, tags, sort_order) VALUES (?, ?, ?, ?, ?, ?)'
+    ).bind(body.slug, body.title, body.description, body.youtube_id, body.tags ?? '', body.sort_order).run()
     return Response.json({ success: true })
   }
 
