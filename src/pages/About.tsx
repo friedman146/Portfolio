@@ -49,7 +49,7 @@ function About() {
         )}
       </div>
 
-      <div className='flex items-center justify-between flex-wrap gap-6'>
+      <div className='mt-16 pt-8 border-t border-silver/10 flex items-center justify-between flex-wrap gap-6'>
         <div className='flex gap-6 flex-wrap'>
           {tags.map((tag) => (
             <span key={tag} className='text-xs tracking-widest uppercase text-silver/30'>
