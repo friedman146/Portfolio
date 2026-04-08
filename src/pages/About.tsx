@@ -28,7 +28,7 @@ function About() {
       <span className='text-xs tracking-widest uppercase text-silver/50'>About</span>
 
       {/* Main content row — text left, image right */}
-      <div className='flex flex-col lg:flex-row gap-12 items-start'>
+      <div className='flex flex-col md:flex-row gap-12 items-start'>
         <div className='max-w-2xl flex flex-col gap-6'>
           <h1 className='text-5xl font-light tracking-wide text-beige leading-tight whitespace-pre-line'>
             {title}
